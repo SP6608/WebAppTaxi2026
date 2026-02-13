@@ -95,7 +95,7 @@ namespace WebAppTaxi2026.Controllers
 
             if (!ModelState.IsValid)
             {
-                // ВАЖНО: трябва пак да заредим dropdown-а
+                
                 model.Cars = dbContext.Cars
                     .Where(c => c.Driver.UserId == userId)
                     .Select(c => new SelectListItem
