@@ -1,0 +1,35 @@
+﻿@model TaxServiceDetailsViewModel
+
+@{
+    ViewData["Title"] = "Изтрий услуга";
+}
+
+<div class="container py-4">
+    <div class="card shadow-sm border-danger">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">⚠ Потвърди изтриване</h4>
+        </div>
+
+        <div class="card-body">
+            <p>Сигурни ли сте, че искате да изтриете тази услуга?</p>
+
+            <ul>
+                <li><strong>Дата:</strong> @Model.HireDateTime</li>
+                <li><strong>Км:</strong> @Model.TraveledKm</li>
+                <li><strong>Автомобил:</strong> @Model.CarInfo</li>
+            </ul>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="Id" />
+
+                <button type="submit" class="btn btn-danger">
+                    Изтрий
+                </button>
+
+                <a asp-action="All" class="btn btn-secondary">
+                    Отказ
+                </a>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,43 @@
+﻿@model TaxServiceDetailsViewModel
+
+@{
+    ViewData["Title"] = "Детайли за услуга";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">🚕 Детайли за таксиметрова услуга</h4>
+                </div>
+
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-4 fw-bold">@Html.DisplayNameFor(m => m.HireDateTime)</div>
+                        <div class="col-8">@Model.HireDateTime.ToString("dd.MM.yyyy HH:mm")</div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-4 fw-bold">@Html.DisplayNameFor(m => m.DownTime)</div>
+                        <div class="col-8">@Model.DownTime</div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-4 fw-bold">@Html.DisplayNameFor(m => m.TraveledKm)</div>
+                        <div class="col-8">@Model.TraveledKm</div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-4 fw-bold">@Html.DisplayNameFor(m => m.CarInfo)</div>
+                        <div class="col-8">@Model.CarInfo</div>
+                    </div>
+
+                    <div class="mt-4">
+                        <a asp-action="All" class="btn btn-outline-secondary">Назад</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

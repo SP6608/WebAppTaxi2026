@@ -1,0 +1,80 @@
+﻿@model IEnumerable<TaxServiceCreateViewModel>
+
+@{
+    ViewData["Title"] = "Моите услуги";
+}
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">🧾 Моите таксиметрови услуги</h2>
+
+        <a class="btn btn-warning"
+           asp-controller="TaxServices"
+           asp-action="Create">
+            ➕ Добави услуга
+        </a>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            Нямате добавени услуги.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Дата и час</th>
+                        <th>Престой (мин)</th>
+                        <th>Изминати км</th>
+                        <th>Автомобил</th>
+                        <th class="text-end">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var service in Model)
+                    {
+                        <tr>
+                            <td>@service.HireDateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@service.DownTime</td>
+                            <td>@service.TraveledKm</td>
+                            <td>
+                                @service.CarBrand (@service.CarRegNumber)
+                            </td>
+
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary"
+                                   asp-controller="TaxServices"
+                                   asp-action="Details"
+                                   asp-route-id="@service.Id">
+                                    Детайли
+                                </a>
+                            </td>
+                            <td>
+                               
+
+                                <a class="btn btn-sm btn-outline-secondary"
+                                   asp-action="Edit"
+                                   asp-route-id="@service.Id">
+                                    Редакция
+                                </a>
+
+                                <a class="btn btn-sm btn-outline-danger"
+                                   asp-action="Delete"
+                                   asp-route-id="@service.Id">
+                                    Изтрий
+                                </a>
+                            </td>
+
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+</div>
