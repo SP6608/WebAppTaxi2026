@@ -3,10 +3,6 @@
   "WorkspaceRootPath": "C:\\Users\\PC_Media\\Desktop\\ASP.NEt.Fundamentals_Exam_2026-main (2)\\ASP.NEt.Fundamentals_Exam_2026-main\\WebAppTaxi2026\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{503A702B-AFA7-48E4-9B9E-E3A84785D2CA}|WebAppTaxi2026\\WebAppTaxi2026.csproj|c:\\users\\pc_media\\desktop\\asp.net.fundamentals_exam_2026-main (2)\\asp.net.fundamentals_exam_2026-main\\webapptaxi2026\\webapptaxi2026\\viewmodels\\taxservicecreateviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{503A702B-AFA7-48E4-9B9E-E3A84785D2CA}|WebAppTaxi2026\\WebAppTaxi2026.csproj|solutionrelative:webapptaxi2026\\viewmodels\\taxservicecreateviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{503A702B-AFA7-48E4-9B9E-E3A84785D2CA}|WebAppTaxi2026\\WebAppTaxi2026.csproj|c:\\users\\pc_media\\desktop\\asp.net.fundamentals_exam_2026-main (2)\\asp.net.fundamentals_exam_2026-main\\webapptaxi2026\\webapptaxi2026\\views\\taxsservices\\all.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{503A702B-AFA7-48E4-9B9E-E3A84785D2CA}|WebAppTaxi2026\\WebAppTaxi2026.csproj|solutionrelative:webapptaxi2026\\views\\taxsservices\\all.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -26,24 +22,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "TaxServiceCreateViewModel.cs",
-              "DocumentMoniker": "C:\\Users\\PC_Media\\Desktop\\ASP.NEt.Fundamentals_Exam_2026-main (2)\\ASP.NEt.Fundamentals_Exam_2026-main\\WebAppTaxi2026\\WebAppTaxi2026\\ViewModels\\TaxServiceCreateViewModel.cs",
-              "RelativeDocumentMoniker": "WebAppTaxi2026\\ViewModels\\TaxServiceCreateViewModel.cs",
-              "ToolTip": "C:\\Users\\PC_Media\\Desktop\\ASP.NEt.Fundamentals_Exam_2026-main (2)\\ASP.NEt.Fundamentals_Exam_2026-main\\WebAppTaxi2026\\WebAppTaxi2026\\ViewModels\\TaxServiceCreateViewModel.cs",
-              "RelativeToolTip": "WebAppTaxi2026\\ViewModels\\TaxServiceCreateViewModel.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAAAUwAcAAAAqAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-13T14:22:15.447Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "TaxService.cs",
               "DocumentMoniker": "C:\\Users\\PC_Media\\Desktop\\ASP.NEt.Fundamentals_Exam_2026-main (2)\\ASP.NEt.Fundamentals_Exam_2026-main\\WebAppTaxi2026\\WebAppTaxi2026\\Models\\TaxService.cs",
               "RelativeDocumentMoniker": "WebAppTaxi2026\\Models\\TaxService.cs",
@@ -55,7 +38,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "All.cshtml",
               "DocumentMoniker": "C:\\Users\\PC_Media\\Desktop\\ASP.NEt.Fundamentals_Exam_2026-main (2)\\ASP.NEt.Fundamentals_Exam_2026-main\\WebAppTaxi2026\\WebAppTaxi2026\\Views\\TaxsServices\\All.cshtml",
               "RelativeDocumentMoniker": "WebAppTaxi2026\\Views\\TaxsServices\\All.cshtml",
@@ -63,11 +46,12 @@
               "RelativeToolTip": "WebAppTaxi2026\\Views\\TaxsServices\\All.cshtml",
               "ViewState": "AgIAABUAAAAAAAAAAAAAABMAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-02-13T14:16:36.068Z"
+              "WhenOpened": "2026-02-13T14:16:36.068Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "TaxServicesController.cs",
               "DocumentMoniker": "C:\\Users\\PC_Media\\Desktop\\ASP.NEt.Fundamentals_Exam_2026-main (2)\\ASP.NEt.Fundamentals_Exam_2026-main\\WebAppTaxi2026\\WebAppTaxi2026\\Controllers\\TaxServicesController.cs",
               "RelativeDocumentMoniker": "WebAppTaxi2026\\Controllers\\TaxServicesController.cs",
