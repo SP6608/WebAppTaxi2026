@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebAppTaxi2026.Data;
+using WebAppTaxi2026.Models;
 using WebAppTaxi2026.ViewModels;
 
 namespace WebAppTaxi2026.Controllers
@@ -51,6 +53,75 @@ namespace WebAppTaxi2026.Controllers
 
             return View(model);
         }
+        [HttpGet]
+        public IActionResult Create()
+        {
+            var userId = userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(userId))
+                return Challenge();
+
+            var driverId = dbContext.Drivers
+                .Where(d => d.UserId == userId)
+                .Select(d => d.Id)
+                .SingleOrDefault();
+
+            if (driverId == 0)
+                return RedirectToAction("Create", "Drivers");
+
+            var model = new TaxServiceCreateViewModel();
+
+            model.Cars = dbContext.Cars
+                .Where(c => c.DriverId == driverId)
+                .Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = $"{c.Brand} - {c.RegNumber}"
+                })
+                .ToList();
+
+            return View(model);
+        }
+        [HttpPost]
+     
+        public IActionResult Create(TaxServiceCreateViewModel model)
+        {
+            var userId = userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Challenge();
+            }   
+
+            if (!ModelState.IsValid)
+            {
+                // ВАЖНО: трябва пак да заредим dropdown-а
+                model.Cars = dbContext.Cars
+                    .Where(c => c.Driver.UserId == userId)
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = $"{c.Brand} - {c.RegNumber}"
+                    })
+                    .ToList();
+
+                return View(model);
+            }
+
+            var taxService = new TaxService
+            {
+                HireDateTime = model.HireDateTime,
+                DownTime = model.DownTime,
+                TraveledKm = model.TraveledKm,
+                CarId = model.CarId
+            };
+
+            dbContext.TaxServices.Add(taxService);
+            dbContext.SaveChanges();
+
+            return RedirectToAction(nameof(All));
+        }
+
 
     }
 }
