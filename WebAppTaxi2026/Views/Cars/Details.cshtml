@@ -1,0 +1,42 @@
+﻿@model CarDetailsViewModel
+
+@{
+    ViewData["Title"] = "Детайли за автомобил";
+}
+
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">🚗 Детайли за автомобил</h4>
+        </div>
+
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Марка</dt>
+                <dd class="col-sm-9">@Model.Brand</dd>
+
+                <dt class="col-sm-3">Рег. №</dt>
+                <dd class="col-sm-9">@Model.RegNumber</dd>
+
+                <dt class="col-sm-3">Година</dt>
+                <dd class="col-sm-9">@Model.Year</dd>
+
+                <dt class="col-sm-3">Места</dt>
+                <dd class="col-sm-9">@Model.Places</dd>
+
+                <dt class="col-sm-3">Начална такса</dt>
+                <dd class="col-sm-9">@Model.InitialFee лв.</dd>
+
+                <dt class="col-sm-3">Цена / км</dt>
+                <dd class="col-sm-9">@Model.PricePerKm лв.</dd>
+
+                <dt class="col-sm-3">Цена / минута</dt>
+                <dd class="col-sm-9">@Model.PricePerMinute лв.</dd>
+            </dl>
+
+            <div class="mt-3">
+                <a asp-action="All" class="btn btn-outline-secondary">Назад</a>
+            </div>
+        </div>
+    </div>
+</div>

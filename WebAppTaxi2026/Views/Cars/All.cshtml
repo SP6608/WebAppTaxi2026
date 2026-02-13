@@ -1,0 +1,71 @@
+﻿@model ICollection<CarListItemViewModel>
+
+@{
+    ViewData["Title"] = "Моите автомобили";
+}
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">🚗 Моите автомобили</h2>
+
+        <a class="btn btn-primary"
+           asp-controller="Cars"
+           asp-action="Create">
+            Добави кола
+        </a>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            Нямате добавени автомобили.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Марка</th>
+                        <th>Рег. №</th>
+                        <th>Година</th>
+                        <th>Места</th>
+                        <th class="text-end">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var car in Model)
+                    {
+                        <tr>
+                            <td>@car.Brand</td>
+                            <td>@car.RegNumber</td>
+                            <td>@car.Year</td>
+                            <td>@car.Places</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary"
+                                   asp-action="Details"
+                                   asp-route-id="@car.Id">
+                                    Детайли
+                                </a>
+
+                                <a class="btn btn-sm btn-outline-secondary"
+                                   asp-action="Edit"
+                                   asp-route-id="@car.Id">
+                                    Редакция
+                                </a>
+
+                                <a class="btn btn-sm btn-outline-danger"
+                                   asp-action="Delete"
+                                   asp-route-id="@car.Id">
+                                    Изтрий
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

@@ -1,0 +1,86 @@
+﻿@model WebAppTaxi2026.ViewModels.CarCreateViewModel
+
+@{
+    ViewData["Title"] = "Редакция на автомобил";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">✏️ Редакция на автомобил</h4>
+                </div>
+
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+
+                        
+                        <input asp-for="Id" type="hidden" />
+
+                        <div class="mb-3">
+                            <label asp-for="Brand" class="form-label"></label>
+                            <input asp-for="Brand" class="form-control" />
+                            <span asp-validation-for="Brand" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RegNumber" class="form-label"></label>
+                            <input asp-for="RegNumber" class="form-control" />
+                            <span asp-validation-for="RegNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Year" class="form-label"></label>
+                                <input asp-for="Year" type="number" class="form-control" />
+                                <span asp-validation-for="Year" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Places" class="form-label"></label>
+                                <input asp-for="Places" type="number" class="form-control" />
+                                <span asp-validation-for="Places" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="InitialFee" class="form-label"></label>
+                                <input asp-for="InitialFee" type="number" step="0.01" class="form-control" />
+                                <span asp-validation-for="InitialFee" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="PricePerKm" class="form-label"></label>
+                                <input asp-for="PricePerKm" type="number" step="0.01" class="form-control" />
+                                <span asp-validation-for="PricePerKm" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="PricePerMinute" class="form-label"></label>
+                                <input asp-for="PricePerMinute" type="number" step="0.01" class="form-control" />
+                                <span asp-validation-for="PricePerMinute" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="All" class="btn btn-outline-secondary">
+                                Назад
+                            </a>
+
+                            <button type="submit" class="btn btn-primary">
+                                Запази
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,52 @@
+﻿@model CarDeleteViewModel
+
+@{
+    ViewData["Title"] = "Изтриване на автомобил";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">🗑️ Изтриване на автомобил</h4>
+                </div>
+
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        Сигурни ли сте, че искате да изтриете този автомобил?
+                        <strong>Действието е необратимо.</strong>
+                    </div>
+
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Марка</dt>
+                        <dd class="col-sm-8">@Model.Brand</dd>
+
+                        <dt class="col-sm-4">Рег. №</dt>
+                        <dd class="col-sm-8">@Model.RegNumber</dd>
+
+                        <dt class="col-sm-4">Година</dt>
+                        <dd class="col-sm-8">@Model.Year</dd>
+                    </dl>
+
+                    <form asp-action="Delete" method="post" class="mt-4">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="Id" type="hidden" />
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="All" class="btn btn-outline-secondary">
+                                Отказ
+                            </a>
+
+                            <button type="submit" class="btn btn-danger">
+                                Изтрий
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
