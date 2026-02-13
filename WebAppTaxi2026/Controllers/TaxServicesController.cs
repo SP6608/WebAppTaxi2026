@@ -173,6 +173,51 @@ namespace WebAppTaxi2026.Controllers
 
             return View(model);
         }
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            var userId = userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+                return Challenge();
+
+            var model = dbContext.TaxServices
+                .Where(t => t.Id == id && t.Car.Driver.UserId == userId)
+                .Select(t => new TaxServiceDetailsViewModel
+                {
+                    Id = t.Id,
+                    HireDateTime = t.HireDateTime,
+                    DownTime = t.DownTime,
+                    TraveledKm = t.TraveledKm,
+                    CarInfo = t.Car.Brand + " (" + t.Car.RegNumber + ")"
+                })
+                .FirstOrDefault();
+
+            if (model == null)
+                return NotFound();
+
+            return View(model);
+        }
+        [HttpPost]
+        
+        public IActionResult Delete(int id, TaxServiceDetailsViewModel model)
+        {
+            var userId = userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+                return Challenge();
+
+            var service = dbContext.TaxServices
+                .Include(t => t.Car)
+                .ThenInclude(c => c.Driver)
+                .FirstOrDefault(t => t.Id == id && t.Car.Driver.UserId == userId);
+
+            if (service == null)
+                return NotFound();
+
+            dbContext.TaxServices.Remove(service);
+            dbContext.SaveChanges();
+
+            return RedirectToAction(nameof(All));
+        }
 
 
     }
