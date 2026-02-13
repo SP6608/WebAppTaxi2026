@@ -25,9 +25,11 @@ namespace WebAppTaxi2026.Controllers
             var userId = userManager.GetUserId(User);
 
             if (string.IsNullOrEmpty(userId))
+            {
                 return Challenge();
+            }
 
-            // Намираме текущия Driver
+           
             var driverId = dbContext.Drivers
                 .AsNoTracking()
                 .Where(d => d.UserId == userId)
@@ -57,11 +59,11 @@ namespace WebAppTaxi2026.Controllers
         public IActionResult Create()
         {
             var userId = userManager.GetUserId(User);
-
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
             var driverId = dbContext.Drivers
+                .AsNoTracking()
                 .Where(d => d.UserId == userId)
                 .Select(d => d.Id)
                 .SingleOrDefault();
@@ -69,39 +71,60 @@ namespace WebAppTaxi2026.Controllers
             if (driverId == 0)
                 return RedirectToAction("Create", "Drivers");
 
-            var model = new TaxServiceCreateViewModel();
-
-            model.Cars = dbContext.Cars
-                .Where(c => c.DriverId == driverId)
-                .Select(c => new SelectListItem
-                {
-                    Value = c.Id.ToString(),
-                    Text = $"{c.Brand} - {c.RegNumber}"
-                })
-                .ToList();
+            var model = new TaxServiceCreateViewModel
+            {
+                HireDateTime = DateTime.Now,
+                Cars = dbContext.Cars
+                    .AsNoTracking()
+                    .Where(c => c.DriverId == driverId)
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = $"{c.Brand} ({c.RegNumber})"
+                    })
+                    .ToList()
+            };
 
             return View(model);
         }
+
         [HttpPost]
-     
+       
         public IActionResult Create(TaxServiceCreateViewModel model)
         {
             var userId = userManager.GetUserId(User);
-
             if (string.IsNullOrEmpty(userId))
-            {
                 return Challenge();
-            }   
+
+            var driverId = dbContext.Drivers
+                .AsNoTracking()
+                .Where(d => d.UserId == userId)
+                .Select(d => d.Id)
+                .SingleOrDefault();
+
+            if (driverId == 0)
+                return RedirectToAction("Create", "Drivers");
+
+          
+            var carExistsForDriver = dbContext.Cars
+                .AsNoTracking()
+                .Any(c => c.Id == model.CarId && c.DriverId == driverId);
+
+            if (!carExistsForDriver)
+            {
+                ModelState.AddModelError(nameof(model.CarId), "Невалиден автомобил.");
+            }
 
             if (!ModelState.IsValid)
             {
                 
                 model.Cars = dbContext.Cars
-                    .Where(c => c.Driver.UserId == userId)
+                    .AsNoTracking()
+                    .Where(c => c.DriverId == driverId)
                     .Select(c => new SelectListItem
                     {
                         Value = c.Id.ToString(),
-                        Text = $"{c.Brand} - {c.RegNumber}"
+                        Text = $"{c.Brand} ({c.RegNumber})"
                     })
                     .ToList();
 
@@ -120,6 +143,35 @@ namespace WebAppTaxi2026.Controllers
             dbContext.SaveChanges();
 
             return RedirectToAction(nameof(All));
+        }
+        [HttpGet]
+        public IActionResult Details(int id)
+        {
+            var userId = userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Challenge();
+            }
+
+            var model = dbContext.TaxServices
+                .AsNoTracking()
+                .Where(t => t.Id == id && t.Car.Driver.UserId == userId)
+                .Select(t => new TaxServiceDetailsViewModel
+                {
+                    Id = t.Id,
+                    HireDateTime = t.HireDateTime,
+                    DownTime = t.DownTime,
+                    TraveledKm = t.TraveledKm,
+                    CarInfo = $"{t.Car.Brand} ({t.Car.RegNumber})"
+                })
+                .SingleOrDefault();
+
+            if (model == null)
+            {
+                return NotFound();
+            }
+
+            return View(model);
         }
 
 
