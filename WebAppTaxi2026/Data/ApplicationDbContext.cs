@@ -24,8 +24,7 @@ namespace WebAppTaxi2026.Data
                 .WithOne()
                 .HasForeignKey<Driver>(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            //var hasher = new PasswordHasher<IdentityUser>();
+            var hasher = new PasswordHasher<IdentityUser>();
 
             var user1 = new IdentityUser
             {
@@ -35,9 +34,10 @@ namespace WebAppTaxi2026.Data
                 Email = "driver1@taxi.com",
                 NormalizedEmail = "DRIVER1@TAXI.COM",
                 EmailConfirmed = true,
-                SecurityStamp = "seed-driver-1"
+                SecurityStamp = "seed-driver-1",
+                ConcurrencyStamp = "seed-driver-1"
             };
-            //user1.PasswordHash = hasher.HashPassword(user1, "Driver123!");
+            user1.PasswordHash = hasher.HashPassword(user1, "Driver123!");
 
             var user2 = new IdentityUser
             {
@@ -47,12 +47,12 @@ namespace WebAppTaxi2026.Data
                 Email = "driver2@taxi.com",
                 NormalizedEmail = "DRIVER2@TAXI.COM",
                 EmailConfirmed = true,
-                SecurityStamp = "seed-driver-2"
+                SecurityStamp = "seed-driver-2",
+                ConcurrencyStamp = "seed-driver-2"
             };
-           // user2.PasswordHash = hasher.HashPassword(user2, "Driver123!");
+            user2.PasswordHash = hasher.HashPassword(user2, "Driver123!");
 
-            //builder.Entity<IdentityUser>().HasData(user1, user2);
-
+            builder.Entity<IdentityUser>().HasData(user1, user2);
             builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         }
 
