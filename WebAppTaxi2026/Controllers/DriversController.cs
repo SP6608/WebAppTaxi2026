@@ -62,7 +62,7 @@ namespace WebAppTaxi2026.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
-            // ако вече има профил, да не прави нов
+            
             var hasProfile = dbContext.Drivers.AsNoTracking().Any(d => d.UserId == userId);
             if (hasProfile)
                 return RedirectToAction(nameof(Details));
@@ -70,8 +70,7 @@ namespace WebAppTaxi2026.Controllers
             return View();
         }
         [HttpPost]
- 
-        [Authorize]
+
         public IActionResult Create(DriverViewModel model)
         {
             var userId = userManager.GetUserId(User);
@@ -79,7 +78,7 @@ namespace WebAppTaxi2026.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
-            // Проверка дали вече има профил
+            
             var alreadyExists = dbContext.Drivers.Any(d => d.UserId == userId);
             if (alreadyExists)
                 return RedirectToAction(nameof(Details));
@@ -101,6 +100,69 @@ namespace WebAppTaxi2026.Controllers
                 dbContext.SaveChanges();
                 return RedirectToAction(nameof(Details));
            
+        }
+        [HttpGet]
+  
+        public IActionResult Edit(int id)
+        {
+            var userId = userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+                return Challenge();
+
+            var model = dbContext.Drivers
+                .AsNoTracking()
+                .Where(d => d.Id == id && d.UserId == userId)
+                .Select(d => new DriverViewModel
+                {
+                    Id = d.Id,
+                    FirstName = d.FirstName,
+                    LastName = d.LastName,
+                    IDCard = d.IDCard,
+                    Address = d.Address,
+                    GSM = d.GSM
+                })
+                .SingleOrDefault();
+
+            if (model == null)
+            {
+                return NotFound();
+            }
+
+            return View(model);
+        }
+        [HttpPost]
+
+        public IActionResult Edit(int id, DriverViewModel model)
+        {
+            var userId = userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+                return Challenge();
+
+            if (id != model.Id)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var driver = dbContext.Drivers
+                .FirstOrDefault(d => d.Id == id && d.UserId == userId);
+
+            if (driver == null)
+                return NotFound();
+
+            driver.FirstName = model.FirstName;
+            driver.LastName = model.LastName;
+            driver.IDCard = model.IDCard;
+            driver.Address = model.Address;
+            driver.GSM = model.GSM;
+
+            dbContext.SaveChanges();
+
+            return RedirectToAction(nameof(Details));
         }
 
     }
