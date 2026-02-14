@@ -218,6 +218,84 @@ namespace WebAppTaxi2026.Controllers
 
             return RedirectToAction(nameof(All));
         }
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var userId = userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(userId))
+                return Challenge();
+
+            var service = dbContext.TaxServices
+                .Include(t => t.Car)
+                .ThenInclude(c => c.Driver)
+                .FirstOrDefault(t => t.Id == id && t.Car.Driver.UserId == userId);
+
+            if (service == null)
+                return NotFound();
+
+            var model = new TaxServiceCreateViewModel
+            {
+                Id = service.Id,
+                HireDateTime = service.HireDateTime,
+                DownTime = service.DownTime,
+                TraveledKm = service.TraveledKm,
+                CarId = service.CarId,
+                Cars = dbContext.Cars
+                    .Where(c => c.Driver.UserId == userId)
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = $"{c.Brand} ({c.RegNumber})"
+                    })
+                    .ToList()
+            };
+
+            return View(model);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, TaxServiceCreateViewModel model)
+        {
+            var userId = userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(userId))
+                return Challenge();
+
+            if (id != model.Id)
+                return BadRequest();
+
+            if (!ModelState.IsValid)
+            {
+                model.Cars = dbContext.Cars
+                    .Where(c => c.Driver.UserId == userId)
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = $"{c.Brand} ({c.RegNumber})"
+                    })
+                    .ToList();
+
+                return View(model);
+            }
+
+            var service = dbContext.TaxServices
+                .Include(t => t.Car)
+                .ThenInclude(c => c.Driver)
+                .SingleOrDefault(t => t.Id == id && t.Car.Driver.UserId == userId);
+
+            if (service == null)
+                return NotFound();
+
+            service.HireDateTime = model.HireDateTime;
+            service.DownTime = model.DownTime;
+            service.TraveledKm = model.TraveledKm;
+            service.CarId = model.CarId;
+
+            dbContext.SaveChanges();
+
+            return RedirectToAction(nameof(All));
+        }
 
 
     }
