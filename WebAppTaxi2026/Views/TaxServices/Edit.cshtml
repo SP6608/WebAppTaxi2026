@@ -1,0 +1,64 @@
+﻿@model WebAppTaxi2026.ViewModels.TaxServiceCreateViewModel
+
+@{
+    ViewData["Title"] = "Редакция на услуга";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">✏️ Редакция на таксиметрова услуга</h4>
+                </div>
+
+                <div class="card-body">
+                    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="Id" type="hidden" />
+
+                        <div class="mb-3">
+                            <label asp-for="HireDateTime" class="form-label"></label>
+                            <input asp-for="HireDateTime" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="HireDateTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="DownTime" class="form-label"></label>
+                            <input asp-for="DownTime" type="number" class="form-control" />
+                            <span asp-validation-for="DownTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="TraveledKm" class="form-label"></label>
+                            <input asp-for="TraveledKm" type="number" step="0.01" class="form-control" />
+                            <span asp-validation-for="TraveledKm" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CarId" class="form-label"></label>
+                            <select asp-for="CarId" class="form-select" asp-items="Model.Cars">
+                                <option value="">-- Избери автомобил --</option>
+                            </select>
+                            <span asp-validation-for="CarId" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="All" class="btn btn-outline-secondary">
+                                Назад
+                            </a>
+
+                            <button type="submit" class="btn btn-primary">
+                                Запази
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
