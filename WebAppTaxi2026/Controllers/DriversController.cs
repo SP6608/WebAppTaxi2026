@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,23 +8,26 @@ using WebAppTaxi2026.ViewModels;
 
 namespace WebAppTaxi2026.Controllers
 {
+    [Authorize]
     public class DriversController : Controller
     {
         private readonly ApplicationDbContext dbContext;
         private readonly UserManager<IdentityUser> userManager;
-        public DriversController(ApplicationDbContext dbContext, UserManager<IdentityUser> userManager )
+
+        public DriversController(ApplicationDbContext dbContext, UserManager<IdentityUser> userManager)
         {
             this.dbContext = dbContext;
             this.userManager = userManager;
         }
+
         [HttpGet]
-        public IActionResult Details()
+        public async Task<IActionResult> Details()
         {
             var userId = userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
-            var model = dbContext.Drivers
+            var model = await dbContext.Drivers
                 .AsNoTracking()
                 .Where(d => d.UserId == userId)
                 .Select(d => new DriverViewModel
@@ -46,40 +48,42 @@ namespace WebAppTaxi2026.Controllers
                         Places = c.Places
                     }).ToList()
                 })
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
             if (model == null)
                 return RedirectToAction(nameof(Create));
-
 
             return View(model);
         }
 
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             var userId = userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
-            
-            var hasProfile = dbContext.Drivers.AsNoTracking().Any(d => d.UserId == userId);
+            var hasProfile = await dbContext.Drivers
+                .AsNoTracking()
+                .AnyAsync(d => d.UserId == userId);
+
             if (hasProfile)
                 return RedirectToAction(nameof(Details));
 
             return View();
         }
-        [HttpPost]
 
-        public IActionResult Create(DriverViewModel model)
+        [HttpPost]
+        public async Task<IActionResult> Create(DriverViewModel model)
         {
             var userId = userManager.GetUserId(User);
-
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
-            
-            var alreadyExists = dbContext.Drivers.Any(d => d.UserId == userId);
+            var alreadyExists = await dbContext.Drivers
+                .AsNoTracking()
+                .AnyAsync(d => d.UserId == userId);
+
             if (alreadyExists)
                 return RedirectToAction(nameof(Details));
 
@@ -96,20 +100,20 @@ namespace WebAppTaxi2026.Controllers
                 UserId = userId
             };
 
-                dbContext.Drivers.Add(driver);
-                dbContext.SaveChanges();
-                return RedirectToAction(nameof(Details));
-           
+            await dbContext.Drivers.AddAsync(driver);
+            await dbContext.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Details));
         }
+
         [HttpGet]
-  
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
             var userId = userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
-            var model = dbContext.Drivers
+            var model = await dbContext.Drivers
                 .AsNoTracking()
                 .Where(d => d.Id == id && d.UserId == userId)
                 .Select(d => new DriverViewModel
@@ -121,35 +125,29 @@ namespace WebAppTaxi2026.Controllers
                     Address = d.Address,
                     GSM = d.GSM
                 })
-                .SingleOrDefault();
+                .SingleOrDefaultAsync();
 
             if (model == null)
-            {
                 return NotFound();
-            }
 
             return View(model);
         }
-        [HttpPost]
 
-        public IActionResult Edit(int id, DriverViewModel model)
+        [HttpPost]
+        public async Task<IActionResult> Edit(int id, DriverViewModel model)
         {
             var userId = userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
             if (id != model.Id)
-            {
                 return BadRequest();
-            }
 
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
-            var driver = dbContext.Drivers
-                .FirstOrDefault(d => d.Id == id && d.UserId == userId);
+            var driver = await dbContext.Drivers
+                .SingleOrDefaultAsync(d => d.Id == id && d.UserId == userId);
 
             if (driver == null)
                 return NotFound();
@@ -160,10 +158,9 @@ namespace WebAppTaxi2026.Controllers
             driver.Address = model.Address;
             driver.GSM = model.GSM;
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             return RedirectToAction(nameof(Details));
         }
-
     }
 }
