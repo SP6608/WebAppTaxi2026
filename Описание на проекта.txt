@@ -59,3 +59,4 @@ Migrations и Seed Data
 Проверка за собственост на данните при Edit, Details и Delete.
 
 Anti-forgery защита при POST заявки.
+Advance
