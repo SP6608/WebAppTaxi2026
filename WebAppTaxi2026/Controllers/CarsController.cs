@@ -22,15 +22,16 @@ namespace WebAppTaxi2026.Controllers
         }
 
         [HttpGet]
-        
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-
             var userId = userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
-            var hasDriver = dbContext.Drivers.AsNoTracking().Any(d => d.UserId == userId);
+            var hasDriver = await dbContext.Drivers
+                .AsNoTracking()
+                .AnyAsync(d => d.UserId == userId);
+
             if (!hasDriver)
                 return RedirectToAction("Create", "Drivers");
 
@@ -38,8 +39,7 @@ namespace WebAppTaxi2026.Controllers
         }
 
         [HttpPost]
-        
-        public IActionResult Create(CarCreateViewModel model)
+        public async Task<IActionResult> Create(CarCreateViewModel model)
         {
             var userId = userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
@@ -47,11 +47,11 @@ namespace WebAppTaxi2026.Controllers
                 return Challenge();
             }
 
-            // 1) Трябва да ИМА Driver профил, иначе не може да добавя кола
-            var driverId = dbContext.Drivers
+            
+            var driverId = await dbContext.Drivers
                 .Where(d => d.UserId == userId)
                 .Select(d => d.Id)
-                .SingleOrDefault();
+                .SingleOrDefaultAsync();
 
             if (driverId == 0)
             {
@@ -62,6 +62,17 @@ namespace WebAppTaxi2026.Controllers
                 return View(model);
 
             
+            var regExists = await dbContext.Cars
+                .AsNoTracking()
+                .AnyAsync(c => c.RegNumber == model.RegNumber);
+
+            if (regExists)
+            {
+                ModelState.AddModelError(nameof(model.RegNumber),
+                    "Този регистрационен номер вече съществува.");
+                return View(model);
+            }
+
             var car = new Car
             {
                 Brand = model.Brand,
@@ -74,54 +85,45 @@ namespace WebAppTaxi2026.Controllers
                 DriverId = driverId
             };
 
-            var regExists = dbContext.Cars
-            .AsNoTracking()
-            .Any(c => c.RegNumber == model.RegNumber);
+            await dbContext.Cars.AddAsync(car);
+            await dbContext.SaveChangesAsync();
 
-            if (regExists)
-            {
-                ModelState.AddModelError(nameof(model.RegNumber), "Този регистрационен номер вече съществува.");
-                return View(model);
-            }
-            else
-            {
-                dbContext.Cars.Add(car);
-                dbContext.SaveChanges();
-                return RedirectToAction("Details","Drivers");
-            }
-
+            return RedirectToAction("Details", "Drivers");
         }
         [HttpGet]
-        public IActionResult All()
+        public async Task<IActionResult> All()
         {
-            //Колите на точно определен шофьор
+            // Колите на точно определен шофьор
             var userId = userManager.GetUserId(User);
-            var driverId = dbContext.Drivers
+            if (string.IsNullOrEmpty(userId))
+                return Challenge();
+
+            var driverId = await dbContext.Drivers
                 .AsNoTracking()
                 .Where(d => d.UserId == userId)
                 .Select(d => d.Id)
-                .SingleOrDefault();
+                .SingleOrDefaultAsync();
 
-            ICollection<CarListItemViewModel>model=dbContext
-                .Cars
-                .Include(c=>c.Driver)
+            if (driverId == 0)
+                return RedirectToAction("Create", "Drivers");
+
+            ICollection<CarListItemViewModel> model = await dbContext.Cars
                 .AsNoTracking()
                 .Where(c => c.DriverId == driverId)
-                .Select(c=>new CarListItemViewModel()
+                .Select(c => new CarListItemViewModel
                 {
                     Id = c.Id,
                     Brand = c.Brand,
                     RegNumber = c.RegNumber,
                     Year = c.Year,
-                    Places = c.Places,
-
+                    Places = c.Places
                 })
-                .ToList();
-            return View(model); 
-        }
+                .ToListAsync();
 
+            return View(model);
+        }
         [HttpGet]
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
             var userId = userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
@@ -129,7 +131,7 @@ namespace WebAppTaxi2026.Controllers
                 return Challenge();
             }
 
-            var car = dbContext.Cars
+            var car = await dbContext.Cars
                 .AsNoTracking()
                 .Where(c => c.Id == id && c.Driver.UserId == userId)
                 .Select(c => new CarDetailsViewModel
@@ -143,7 +145,7 @@ namespace WebAppTaxi2026.Controllers
                     PricePerKm = c.PricePerKm,
                     PricePerMinute = c.PricePerMinute
                 })
-                .SingleOrDefault();
+                .SingleOrDefaultAsync();
 
             if (car == null)
             {
@@ -153,15 +155,18 @@ namespace WebAppTaxi2026.Controllers
             return View(car);
         }
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
             var userId = userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+                return Challenge();
 
-            var car = dbContext.Cars
+            var car = await dbContext.Cars
+                .AsNoTracking()
                 .Where(c => c.Id == id && c.Driver.UserId == userId)
                 .Select(c => new CarCreateViewModel
                 {
-                    Id = c.Id,                     
+                    Id = c.Id,
                     Brand = c.Brand,
                     RegNumber = c.RegNumber,
                     Year = c.Year,
@@ -170,7 +175,7 @@ namespace WebAppTaxi2026.Controllers
                     PricePerKm = c.PricePerKm,
                     PricePerMinute = c.PricePerMinute
                 })
-                .SingleOrDefault();
+                .SingleOrDefaultAsync();
 
             if (car == null)
                 return NotFound();
@@ -179,18 +184,33 @@ namespace WebAppTaxi2026.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(CarCreateViewModel model)
+        public async Task<IActionResult> Edit(CarCreateViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
             var userId = userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+                return Challenge();
 
-            var car = dbContext.Cars
-                .FirstOrDefault(c => c.Id == model.Id && c.Driver.UserId == userId);
+            var car = await dbContext.Cars
+                .FirstOrDefaultAsync(c => c.Id == model.Id && c.Driver.UserId == userId);
 
             if (car == null)
+            {
                 return NotFound();
+            }    
+
+           
+            var regExists = await dbContext.Cars
+                .AsNoTracking()
+                .AnyAsync(c => c.RegNumber == model.RegNumber && c.Id != model.Id);
+
+            if (regExists)
+            {
+                ModelState.AddModelError(nameof(model.RegNumber), "Този регистрационен номер вече съществува.");
+                return View(model);
+            }
 
             car.Brand = model.Brand;
             car.RegNumber = model.RegNumber;
@@ -200,19 +220,18 @@ namespace WebAppTaxi2026.Controllers
             car.PricePerKm = model.PricePerKm;
             car.PricePerMinute = model.PricePerMinute;
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             return RedirectToAction(nameof(All));
         }
         [HttpGet]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var userId = userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
-            {
                 return Challenge();
-            }
-            var model = dbContext.Cars
+
+            var model = await dbContext.Cars
                 .AsNoTracking()
                 .Where(c => c.Id == id && c.Driver.UserId == userId)
                 .Select(c => new CarDeleteViewModel
@@ -222,15 +241,15 @@ namespace WebAppTaxi2026.Controllers
                     RegNumber = c.RegNumber,
                     Year = c.Year
                 })
-                .SingleOrDefault();
+                .SingleOrDefaultAsync();
 
             if (model == null)
                 return NotFound();
 
             return View(model);
         }
+
         [HttpPost]
-        
         public IActionResult Delete(CarDeleteViewModel model)
         {
             var userId = userManager.GetUserId(User);

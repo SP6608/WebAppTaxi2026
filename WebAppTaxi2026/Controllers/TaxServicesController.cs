@@ -14,32 +14,30 @@ namespace WebAppTaxi2026.Controllers
     {
         private readonly ApplicationDbContext dbContext;
         private readonly UserManager<IdentityUser> userManager;
+
         public TaxServicesController(ApplicationDbContext dbContext, UserManager<IdentityUser> userManager)
         {
             this.dbContext = dbContext;
             this.userManager = userManager;
         }
+
         [HttpGet]
-        public IActionResult All()
+        public async Task<IActionResult> All()
         {
             var userId = userManager.GetUserId(User);
-
             if (string.IsNullOrEmpty(userId))
-            {
                 return Challenge();
-            }
 
-           
-            var driverId = dbContext.Drivers
+            var driverId = await dbContext.Drivers
                 .AsNoTracking()
                 .Where(d => d.UserId == userId)
                 .Select(d => d.Id)
-                .SingleOrDefault();
+                .SingleOrDefaultAsync();
 
             if (driverId == 0)
                 return RedirectToAction("Create", "Drivers");
 
-            var model = dbContext.TaxServices
+            var model = await dbContext.TaxServices
                 .AsNoTracking()
                 .Where(t => t.Car.DriverId == driverId)
                 .Select(t => new TaxServiceCreateViewModel
@@ -51,74 +49,72 @@ namespace WebAppTaxi2026.Controllers
                     CarBrand = t.Car.Brand,
                     CarRegNumber = t.Car.RegNumber
                 })
-                .ToList();
+                .ToListAsync();
 
             return View(model);
         }
+
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             var userId = userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
-            var driverId = dbContext.Drivers
+            var driverId = await dbContext.Drivers
                 .AsNoTracking()
                 .Where(d => d.UserId == userId)
                 .Select(d => d.Id)
-                .SingleOrDefault();
+                .SingleOrDefaultAsync();
 
             if (driverId == 0)
                 return RedirectToAction("Create", "Drivers");
 
+            var cars = await dbContext.Cars
+                .AsNoTracking()
+                .Where(c => c.DriverId == driverId)
+                .Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = $"{c.Brand} ({c.RegNumber})"
+                })
+                .ToListAsync();
+
             var model = new TaxServiceCreateViewModel
             {
                 HireDateTime = DateTime.Now,
-                Cars = dbContext.Cars
-                    .AsNoTracking()
-                    .Where(c => c.DriverId == driverId)
-                    .Select(c => new SelectListItem
-                    {
-                        Value = c.Id.ToString(),
-                        Text = $"{c.Brand} ({c.RegNumber})"
-                    })
-                    .ToList()
+                Cars = cars
             };
 
             return View(model);
         }
 
         [HttpPost]
-       
-        public IActionResult Create(TaxServiceCreateViewModel model)
+        public async Task<IActionResult> Create(TaxServiceCreateViewModel model)
         {
             var userId = userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
-            var driverId = dbContext.Drivers
+            var driverId = await dbContext.Drivers
                 .AsNoTracking()
                 .Where(d => d.UserId == userId)
                 .Select(d => d.Id)
-                .SingleOrDefault();
+                .SingleOrDefaultAsync();
 
             if (driverId == 0)
                 return RedirectToAction("Create", "Drivers");
 
-          
-            var carExistsForDriver = dbContext.Cars
+            var carExistsForDriver = await dbContext.Cars
                 .AsNoTracking()
-                .Any(c => c.Id == model.CarId && c.DriverId == driverId);
+                .AnyAsync(c => c.Id == model.CarId && c.DriverId == driverId);
 
             if (!carExistsForDriver)
-            {
                 ModelState.AddModelError(nameof(model.CarId), "Невалиден автомобил.");
-            }
 
             if (!ModelState.IsValid)
             {
-                
-                model.Cars = dbContext.Cars
+                model.Cars = await dbContext.Cars
                     .AsNoTracking()
                     .Where(c => c.DriverId == driverId)
                     .Select(c => new SelectListItem
@@ -126,7 +122,7 @@ namespace WebAppTaxi2026.Controllers
                         Value = c.Id.ToString(),
                         Text = $"{c.Brand} ({c.RegNumber})"
                     })
-                    .ToList();
+                    .ToListAsync();
 
                 return View(model);
             }
@@ -139,21 +135,20 @@ namespace WebAppTaxi2026.Controllers
                 CarId = model.CarId
             };
 
-            dbContext.TaxServices.Add(taxService);
-            dbContext.SaveChanges();
+            await dbContext.TaxServices.AddAsync(taxService);
+            await dbContext.SaveChangesAsync();
 
             return RedirectToAction(nameof(All));
         }
+
         [HttpGet]
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
             var userId = userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
-            {
                 return Challenge();
-            }
 
-            var model = dbContext.TaxServices
+            var model = await dbContext.TaxServices
                 .AsNoTracking()
                 .Where(t => t.Id == id && t.Car.Driver.UserId == userId)
                 .Select(t => new TaxServiceDetailsViewModel
@@ -164,23 +159,23 @@ namespace WebAppTaxi2026.Controllers
                     TraveledKm = t.TraveledKm,
                     CarInfo = $"{t.Car.Brand} ({t.Car.RegNumber})"
                 })
-                .SingleOrDefault();
+                .SingleOrDefaultAsync();
 
             if (model == null)
-            {
                 return NotFound();
-            }
 
             return View(model);
         }
+
         [HttpGet]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var userId = userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
-            var model = dbContext.TaxServices
+            var model = await dbContext.TaxServices
+                .AsNoTracking()
                 .Where(t => t.Id == id && t.Car.Driver.UserId == userId)
                 .Select(t => new TaxServiceDetailsViewModel
                 {
@@ -188,51 +183,67 @@ namespace WebAppTaxi2026.Controllers
                     HireDateTime = t.HireDateTime,
                     DownTime = t.DownTime,
                     TraveledKm = t.TraveledKm,
-                    CarInfo = t.Car.Brand + " (" + t.Car.RegNumber + ")"
+                    CarInfo = $"{t.Car.Brand} ({t.Car.RegNumber})"
                 })
-                .FirstOrDefault();
+                .SingleOrDefaultAsync();
 
             if (model == null)
                 return NotFound();
 
             return View(model);
         }
+
         [HttpPost]
-        
-        public IActionResult Delete(int id, TaxServiceDetailsViewModel model)
+        public async Task<IActionResult> Delete(int id, TaxServiceDetailsViewModel model)
         {
             var userId = userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
-            var service = dbContext.TaxServices
-                .Include(t => t.Car)
-                .ThenInclude(c => c.Driver)
-                .FirstOrDefault(t => t.Id == id && t.Car.Driver.UserId == userId);
+            var service = await dbContext.TaxServices
+                .SingleOrDefaultAsync(t => t.Id == id && t.Car.Driver.UserId == userId);
 
             if (service == null)
                 return NotFound();
 
             dbContext.TaxServices.Remove(service);
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             return RedirectToAction(nameof(All));
         }
+
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
             var userId = userManager.GetUserId(User);
-
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
-            var service = dbContext.TaxServices
-                .Include(t => t.Car)
-                .ThenInclude(c => c.Driver)
-                .FirstOrDefault(t => t.Id == id && t.Car.Driver.UserId == userId);
+            var service = await dbContext.TaxServices
+                .AsNoTracking()
+                .Where(t => t.Id == id && t.Car.Driver.UserId == userId)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.HireDateTime,
+                    t.DownTime,
+                    t.TraveledKm,
+                    t.CarId
+                })
+                .SingleOrDefaultAsync();
 
             if (service == null)
                 return NotFound();
+
+            var cars = await dbContext.Cars
+                .AsNoTracking()
+                .Where(c => c.Driver.UserId == userId)
+                .Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = $"{c.Brand} ({c.RegNumber})"
+                })
+                .ToListAsync();
 
             var model = new TaxServiceCreateViewModel
             {
@@ -241,24 +252,16 @@ namespace WebAppTaxi2026.Controllers
                 DownTime = service.DownTime,
                 TraveledKm = service.TraveledKm,
                 CarId = service.CarId,
-                Cars = dbContext.Cars
-                    .Where(c => c.Driver.UserId == userId)
-                    .Select(c => new SelectListItem
-                    {
-                        Value = c.Id.ToString(),
-                        Text = $"{c.Brand} ({c.RegNumber})"
-                    })
-                    .ToList()
+                Cars = cars
             };
 
             return View(model);
         }
+
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, TaxServiceCreateViewModel model)
+        public async Task<IActionResult> Edit(int id, TaxServiceCreateViewModel model)
         {
             var userId = userManager.GetUserId(User);
-
             if (string.IsNullOrEmpty(userId))
                 return Challenge();
 
@@ -267,22 +270,21 @@ namespace WebAppTaxi2026.Controllers
 
             if (!ModelState.IsValid)
             {
-                model.Cars = dbContext.Cars
+                model.Cars = await dbContext.Cars
+                    .AsNoTracking()
                     .Where(c => c.Driver.UserId == userId)
                     .Select(c => new SelectListItem
                     {
                         Value = c.Id.ToString(),
                         Text = $"{c.Brand} ({c.RegNumber})"
                     })
-                    .ToList();
+                    .ToListAsync();
 
                 return View(model);
             }
 
-            var service = dbContext.TaxServices
-                .Include(t => t.Car)
-                .ThenInclude(c => c.Driver)
-                .SingleOrDefault(t => t.Id == id && t.Car.Driver.UserId == userId);
+            var service = await dbContext.TaxServices
+                .SingleOrDefaultAsync(t => t.Id == id && t.Car.Driver.UserId == userId);
 
             if (service == null)
                 return NotFound();
@@ -292,11 +294,9 @@ namespace WebAppTaxi2026.Controllers
             service.TraveledKm = model.TraveledKm;
             service.CarId = model.CarId;
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
             return RedirectToAction(nameof(All));
         }
-
-
     }
 }
